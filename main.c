@@ -9,6 +9,7 @@ int main(void){//no arguments to start
 	//place pieces for test
 	place(1,1,BLACK);//black
 	place(2,1,WHITE);//white
+	place(4, 4, BLANK);//blank
 
 	printboard();//print out the board
 
@@ -68,4 +69,36 @@ void init(void){//initialise variables
 
 void place(unsigned char x, unsigned char y, unsigned char piece){//place a piece on board
 	board[y - 1][x - 1] = piece;//set piece
+	if (piece == BLANK){//if placng blank piece in one of the star points
+		//4,4 points
+		if (x == 4 && y == 4){//if at star point
+			place(4, 4, STAR);
+		}
+		if (x == 4 && y == 16){//if at star point
+			place(4, 16, STAR);
+		}
+		if (x == 16 && y == 4){//if at star point
+			place(16, 4, STAR);
+		}
+		if (x == 16 && y == 16){//if at star point
+			place(16, 16, STAR);
+		}
+		//4,10 points
+		if (x == 4 && y == 10){//if at star point
+			place(4, 10, STAR);
+		}
+		if (x == 10 && y == 4){//if at star point
+			place(10, 4, STAR);
+		}
+		if (x == 10 && y == 16){//if at star point
+			place(10, 16, STAR);
+		}
+		if (x == 16 && y == 10){//if at star point
+			place(16, 10, STAR);
+		}
+		//10,10 points
+		if (x == 10 && y == 10){//if at star point
+			place(10, 10, STAR);
+		}
+	}
 }
