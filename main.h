@@ -7,14 +7,15 @@
 #include <math.h> //math
 
 #define BOARD_SIZE 19 //board size
-#define BLACK_PIECE "x " //black piece
-#define WHITE_PIECE "o " //white piece
-#define BLANK_POINT ". " //blank spot
-#define STAR_POINT "+ "//special spots
+#define BLACK_PIECE "X " //black piece
+#define WHITE_PIECE "O " //white piece
+#define BLANK_POINT "+ " //blank spot
+#define STAR_POINT "* "//special spots
 #define BLACK 1 //black in array
 #define WHITE 2 //white in array
 #define BLANK 0 //blank in array
 #define STAR 3 //star point in aray
+#define LOG "log.txt" //log file for all games
 
 
 unsigned char board[BOARD_SIZE][BOARD_SIZE];//go board. blank is 0, black is 1, white is 2. star points is 3. board[y][x].
@@ -34,5 +35,12 @@ void init(void);//initialise variables
 
 void place(unsigned char x, unsigned char y, unsigned char piece);//place a piece on board
 
+void territoryscore(void);//count score for territory / japanese scoring
+
+void areascore(void);//count score for area / chinese scoring
+
+void save(const char file);//save board to file
+
+void load(const char file);//load board from file
 
 #endif

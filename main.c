@@ -13,6 +13,10 @@ int main(void){//no arguments to start
 
 	printboard();//print out the board
 
+	territoryscore();//score for territory
+	
+	areascore();//score for area
+
 	exit(EXIT_SUCCESS);//end of program
 }
 
@@ -101,4 +105,25 @@ void place(unsigned char x, unsigned char y, unsigned char piece){//place a piec
 			place(10, 10, STAR);
 		}
 	}
+}
+
+
+void territoryscore(void){//count score for territory / japanese scoring
+
+}
+
+
+void areascore(void){//count score for area / chinese scoring
+
+}
+
+
+
+void save(const char file){//save board to file
+
+}
+
+
+void load(const char file){//load board to file
+
 }
