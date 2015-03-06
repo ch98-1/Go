@@ -56,6 +56,18 @@ int main(void){//no arguments to start
 		}
 
 
+		else if (strcmp(input, "turn") == 0){//if printing bord
+			if (turn == BLACK){//display turn
+				printf("Black's turn\n");
+				writelog("Black's turn\n");//log turn
+			}
+			else {
+				printf("White's turn\n");
+				writelog("White's turn\n");//log turn
+			}
+		}
+
+
 		else if (strcmp(input, "pass") == 0){//if passing
 			pass(turn);
 			if (mode == 2){//if 2 player mode

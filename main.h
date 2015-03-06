@@ -17,7 +17,7 @@
 #define BLANK 0 //blank in array
 #define STAR 3 //star point in aray
 #define LOG "log.txt" //log file for all games
-#define HELP "Commands:\n help, -h, h, -help, or blank to display this message \n load to load file. input filename when prompted \n save to save file. input filename when prompted \n place <x> <y> to place piece on that position \n new to get new game \n print to print out bord \n pass to pass \n quit to quit \n"
+#define HELP "Commands:\n help, -h, h, -help, or blank to display this message \n load to load file. input filename when prompted \n save to save file. input filename when prompted \n place <x> <y> to place piece on that position \n new to get new game \n turn to print out turn \n print to print out bord \n pass to pass \n quit to quit \n"
 
 unsigned char board[BOARD_SIZE][BOARD_SIZE];//go board. blank is 0, black is 1, white is 2. star points is 3. board[y][x].
 unsigned char simulation[BOARD_SIZE][BOARD_SIZE];//copy of go board for simulations and scoring.
