@@ -287,6 +287,7 @@ void place(unsigned char x, unsigned char y, unsigned char piece){//place a piec
 			place(10, 10, STAR);
 		}
 	}
+	//add automatic removal of stones without liberties
 }
 
 
@@ -295,6 +296,7 @@ void place(unsigned char x, unsigned char y, unsigned char piece){//place a piec
 
 
 void territoryscore(void){//count score for territory / japanese scoring
+	//need code
 
 }
 
@@ -304,6 +306,7 @@ void territoryscore(void){//count score for territory / japanese scoring
 
 
 void areascore(void){//count score for area / chinese scoring
+	//need code
 
 }
 
@@ -410,6 +413,7 @@ void writelog(const char* message){//write message in to log file
 
 
 int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that move is legal
+	//just for test write correct code
 	return 1;//it is legal
 }
 
@@ -419,7 +423,8 @@ int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that
 
 void play(void){//make computer play
 	//random play
-	srand(time);//seed rng with time
+	//make better algorithm
+	srand(time(NULL));//seed rng with time
 	int x = rand() % (BOARD_SIZE);//get random move
 	int y = rand() % (BOARD_SIZE);
 	while (legal(x, y, WHITE) == 0){//while it is not a legal move
@@ -431,6 +436,7 @@ void play(void){//make computer play
 	sprintf(move, "White move at %d %d\n", x, y);//make move into string
 	printf("%s", move);//print that move
 	writelog(move);//log that move
+	printboard();//print board
 	printf("Black's Turn\n");//display turn
 	writelog("Black's Turn\n");//log turn
 }
