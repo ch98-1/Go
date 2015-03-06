@@ -105,6 +105,10 @@ int main(void){//no arguments to start
 					}
 
 					printboard();//print the bord
+					if (mode == 1){//if computer mode
+						writelog("Computer's turn\n");//log that computer is playing
+						play();//make computer play white
+					}
 				}
 				else{//if it was a illegalmove
 					printf("Illegal move\n");//irregal move
@@ -117,12 +121,6 @@ int main(void){//no arguments to start
 			}
 		}
 
-
-
-		if (mode == 1){//if computer mode
-			writelog("Computer's turn\n");//log that computer is playing
-			play();//make computer play white
-		}
 
 
 		if (white_pass == 1 && black_pass == 1){//if end of game
