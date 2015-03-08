@@ -303,6 +303,8 @@ void place(unsigned char x, unsigned char y, unsigned char piece){//place a piec
 		}
 	}
 
+	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
+
 	unsigned char opponent;//opponent on array
 	if (piece == BLACK){//if black
 		opponent = WHITE;//opponent is white
@@ -311,17 +313,18 @@ void place(unsigned char x, unsigned char y, unsigned char piece){//place a piec
 		opponent = WHITE;//opponent is black
 	}
 	if (x - 1 > 0 && simulation[y - 1][x - 2] == opponent){//left
-		checkliberty(x - 1, y, simulation);//check for liberty
+		checkliberty(x - 1, y);//check for liberty
 	}
 	if (x + 1 < BOARD_SIZE && simulation[y - 1][x] == opponent){//right
-		checkliberty(x + 1, y, simulation);//check for liberty
+		checkliberty(x + 1, y);//check for liberty
 	}
 	if (y - 1 > 0 && simulation[y - 2][x - 1] == opponent){//up
-		checkliberty(x, y - 1, simulation);//check for liberty
+		checkliberty(x, y - 1);//check for liberty
 	}
 	if (y + 1 < BOARD_SIZE && simulation[y][x - 1] == opponent){//down
-		checkliberty(x, y + 1, simulation);//check for liberty
+		checkliberty(x, y + 1);//check for liberty
 	}
+	memcpy(board, simulation, BOARD_SIZE*BOARD_SIZE);//copy back
 }
 
 
@@ -585,11 +588,11 @@ void pass(unsigned char piece){//pass that turn
 
 
 
-void checkliberty(unsigned char x, unsigned char y, unsigned char** check){//check if it has any liberties and remove if it dosen't
-	unsigned char piece = check[y - 1][x - 1];
+void checkliberty(unsigned char x, unsigned char y){//check if it has any liberties and remove if it dosen't
+	unsigned char piece = simulation[y - 1][x - 1];
 
-	if (floodfill(x, y, piece, 4, BLANK, check) == 0){//run floodfill. if it did get to exeption
-		floodfill(x, y, 4, BLANK, 5, check);//get it back to blank
+	if (floodfill(x, y, piece, 4, BLANK) == 0){//run floodfill. if it did get to exeption
+		floodfill(x, y, 4, BLANK, 5);//get it back to blank
 	}
 
 }
@@ -598,27 +601,27 @@ void checkliberty(unsigned char x, unsigned char y, unsigned char** check){//che
 
 
 
-int floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement, unsigned char exeption, unsigned char** check){//flood fill untill complete unless there is no exeption touching it
+int floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement, unsigned char exeption){//flood fill untill complete unless there is no exeption touching it
 	if (target == replacement){//if target is replacement
 		return 0;//go back 1 recursion
 	}
-	if (check[y - 1][x - 1] != target){//if node wasn't target
-		if (check[y - 1][x - 1] == exeption){//if at exeption
+	if (simulation[y - 1][x - 1] != target){//if node wasn't target
+		if (simulation[y - 1][x - 1] == exeption){//if at exeption
 			return 1;
 		}
 	}
-	check[y - 1][x - 1] = replacement;//replace piece
-	if (x - 1 > 0 && floodfill(x - 1, y, target, replacement, exeption, check) == 1){//left
-		floodfill(x, y, replacement, target, 50, check);//get it back to original color
+	simulation[y - 1][x - 1] = replacement;//replace piece
+	if (x - 1 > 0 && floodfill(x - 1, y, target, replacement, exeption) == 1){//left
+		floodfill(x, y, replacement, target, 50);//get it back to original color
 	}
-	if (x + 1 < BOARD_SIZE && floodfill(x + 1, y, target, replacement, exeption, check) == 1){//right
-		floodfill(x, y, replacement, target, 50, check);//get it back to original color
+	if (x + 1 < BOARD_SIZE && floodfill(x + 1, y, target, replacement, exeption) == 1){//right
+		floodfill(x, y, replacement, target, 50);//get it back to original color
 	}
-	if (y - 1 > 0 && floodfill(x, y - 1, target, replacement, exeption, check) == 1){//up
-		floodfill(x, y, replacement, target, 50, check);//get it back to original color
+	if (y - 1 > 0 && floodfill(x, y - 1, target, replacement, exeption) == 1){//up
+		floodfill(x, y, replacement, target, 50);//get it back to original color
 	}
-	if (y + 1 < BOARD_SIZE && floodfill(x, y + 1, target, replacement, exeption, check) == 1){//down
-		floodfill(x, y, replacement, target, 50, check);//get it back to original color
+	if (y + 1 < BOARD_SIZE && floodfill(x, y + 1, target, replacement, exeption) == 1){//down
+		floodfill(x, y, replacement, target, 50);//get it back to original color
 	}
 
 	return 0;

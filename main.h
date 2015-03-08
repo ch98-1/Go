@@ -66,8 +66,8 @@ void play(void);//make computer play
 
 void pass(unsigned char piece);//pass that turn
 
-void checkliberty(unsigned char x, unsigned char y, unsigned char** check);//check if it has any liberties and remove if it dosen't
+void checkliberty(unsigned char x, unsigned char y);//check if it has any liberties and remove if it dosen't
 
-int floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement, unsigned char exeption, unsigned char** check);//flood fill untill complete unless there is no exeption touching it
+int floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement, unsigned char exeption);//flood fill untill complete unless there is no exeption touching it
 
 #endif
