@@ -88,6 +88,11 @@ int main(void){//no arguments to start
 					writelog("White's turn\n");//log turn
 				}
 			}
+			MOVEBORDS//move the bords
+			if (mode == 1){//if computer mode
+				writelog("Computer's turn\n");//log that computer is playing
+				play();//make computer play white
+			}
 		}
 
 
@@ -115,7 +120,7 @@ int main(void){//no arguments to start
 							turn = BLACK;
 						}
 					}
-
+					MOVEBORDS//move the bords
 					printboard();//print the bord
 					if (mode == 1){//if computer mode
 						writelog("Computer's turn\n");//log that computer is playing
@@ -297,7 +302,26 @@ void place(unsigned char x, unsigned char y, unsigned char piece){//place a piec
 			place(10, 10, STAR);
 		}
 	}
-	//add automatic removal of stones without liberties
+
+	unsigned char opponent;//opponent on array
+	if (piece == BLACK){//if black
+		opponent = WHITE;//opponent is white
+	}
+	else {
+		opponent = WHITE;//opponent is black
+	}
+	if (x - 1 > 0 && simulation[y - 1][x - 2] == opponent){//left
+		checkliberty(x - 1, y, simulation);//check for liberty
+	}
+	if (x + 1 < BOARD_SIZE && simulation[y - 1][x] == opponent){//right
+		checkliberty(x + 1, y, simulation);//check for liberty
+	}
+	if (y - 1 > 0 && simulation[y - 2][x - 1] == opponent){//up
+		checkliberty(x, y - 1, simulation);//check for liberty
+	}
+	if (y + 1 < BOARD_SIZE && simulation[y][x - 1] == opponent){//down
+		checkliberty(x, y + 1, simulation);//check for liberty
+	}
 }
 
 
@@ -335,9 +359,32 @@ void save(const char* file){//save board to file
 	}
 	rewind(data);//set to start
 	int i, j;
+	//save current
 	for (i = 0; i < BOARD_SIZE; i++){//each row
 		for (j = 0; j < BOARD_SIZE; j++){//each position
 			int piece = fputc(board[i][j], data);//write piece
+			if (piece == EOF){
+				printf("data could not be written correctly. Check permission of %s\n", file);//give error message
+				writelog("data could not be written correctly. Check permission of the file\n");//log error message
+				return;//end function
+			}
+		}
+	}
+	//save last
+	for (i = 0; i < BOARD_SIZE; i++){//each row
+		for (j = 0; j < BOARD_SIZE; j++){//each position
+			int piece = fputc(last[i][j], data);//write piece
+			if (piece == EOF){
+				printf("data could not be written correctly. Check permission of %s\n", file);//give error message
+				writelog("data could not be written correctly. Check permission of the file\n");//log error message
+				return;//end function
+			}
+		}
+	}
+	//save ko bord
+	for (i = 0; i < BOARD_SIZE; i++){//each row
+		for (j = 0; j < BOARD_SIZE; j++){//each position
+			int piece = fputc(ko[i][j], data);//write piece
 			if (piece == EOF){
 				printf("data could not be written correctly. Check permission of %s\n", file);//give error message
 				writelog("data could not be written correctly. Check permission of the file\n");//log error message
@@ -373,6 +420,7 @@ void load(const char* file){//load board to file
 	}
 	rewind(data);//set to start
 	int i, j;
+	//load current
 	for (i = 0; i < BOARD_SIZE; i++){//each row
 		for (j = 0; j < BOARD_SIZE; j++){//each position
 			int piece = fgetc(data);//load piece
@@ -384,6 +432,30 @@ void load(const char* file){//load board to file
 			board[i][j] = piece;
 			}
 		}
+	//load last
+	for (i = 0; i < BOARD_SIZE; i++){//each row
+		for (j = 0; j < BOARD_SIZE; j++){//each position
+			int piece = fgetc(data);//load piece
+			if (piece == EOF){
+				printf("End of file reached. Data is not in a correct format.\n");//give error message
+				writelog("End of file reached. Data is not in a correct format.\n");//log error message
+				return;//end function
+			}
+			last[i][j] = piece;
+		}
+	}
+	//load ko bord
+	for (i = 0; i < BOARD_SIZE; i++){//each row
+		for (j = 0; j < BOARD_SIZE; j++){//each position
+			int piece = fgetc(data);//load piece
+			if (piece == EOF){
+				printf("End of file reached. Data is not in a correct format.\n");//give error message
+				writelog("End of file reached. Data is not in a correct format.\n");//log error message
+				return;//end function
+			}
+			ko[i][j] = piece;
+		}
+	}
 	int turn = fgetc(data);//load turn
 	if (turn == EOF){
 		printf("End of file reached. Data is not in a correct format.\n");//give error message
@@ -423,7 +495,48 @@ void writelog(const char* message){//write message in to log file
 
 
 int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that move is legal
-	//just for test write correct code
+	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
+
+	unsigned char opponent;//opponent on array
+	if (piece == BLACK){//if black
+		opponent = WHITE;//opponent is white
+	}
+	else {
+		opponent = WHITE;//opponent is black
+	}
+
+
+	if (simulation[x - 1][y - 1] == piece || simulation[x - 1][y - 1] == opponent){//if that space is already taken
+		return 0;//can't place where there is pieces already 
+	}
+
+
+	simulation[y - 1][x - 1] = piece;//place that piece
+
+
+	if (x - 1 > 0 && simulation[y - 1][x - 2] == opponent){//left
+		checkliberty(x - 1, y, simulation);//check for liberty
+	}
+	if (x + 1 < BOARD_SIZE && simulation[y - 1][x] == opponent){//right
+		checkliberty(x + 1, y, simulation);//check for liberty
+	}
+	if (y - 1 > 0 && simulation[y - 2][x - 1] == opponent){//up
+		checkliberty(x, y - 1, simulation);//check for liberty
+	}
+	if (y + 1 < BOARD_SIZE && simulation[y][x - 1] == opponent){//down
+		checkliberty(x, y + 1, simulation);//check for liberty
+	}
+
+	checkliberty(x, y, simulation);//check at that place
+	if (simulation[x - 1][y - 1] != piece){//if it was suicide
+		return 0;//Illegal
+	}
+
+	if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last bord
+		return 0;//Illegal by ko rule
+	}
+
+	
 	return 1;//it is legal
 }
 
@@ -449,6 +562,7 @@ void play(void){//make computer play
 	printboard();//print board
 	printf("Black's Turn\n");//display turn
 	writelog("Black's Turn\n");//log turn
+	MOVEBORDS//move bords
 }
 
 
@@ -465,4 +579,47 @@ void pass(unsigned char piece){//pass that turn
 		white_pass = 1;//set black as passed
 	}
 
+}
+
+
+
+
+
+void checkliberty(unsigned char x, unsigned char y, unsigned char** check){//check if it has any liberties and remove if it dosen't
+	unsigned char piece = check[y - 1][x - 1];
+
+	if (floodfill(x, y, piece, 4, BLANK, check) == 0){//run floodfill. if it did get to exeption
+		floodfill(x, y, 4, BLANK, 5, check);//get it back to blank
+	}
+
+}
+
+
+
+
+
+int floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement, unsigned char exeption, unsigned char** check){//flood fill untill complete unless there is no exeption touching it
+	if (target == replacement){//if target is replacement
+		return 0;//go back 1 recursion
+	}
+	if (check[y - 1][x - 1] != target){//if node wasn't target
+		if (check[y - 1][x - 1] == exeption){//if at exeption
+			return 1;
+		}
+	}
+	check[y - 1][x - 1] = replacement;//replace piece
+	if (x - 1 > 0 && floodfill(x - 1, y, target, replacement, exeption, check) == 1){//left
+		floodfill(x, y, replacement, target, 50, check);//get it back to original color
+	}
+	if (x + 1 < BOARD_SIZE && floodfill(x + 1, y, target, replacement, exeption, check) == 1){//right
+		floodfill(x, y, replacement, target, 50, check);//get it back to original color
+	}
+	if (y - 1 > 0 && floodfill(x, y - 1, target, replacement, exeption, check) == 1){//up
+		floodfill(x, y, replacement, target, 50, check);//get it back to original color
+	}
+	if (y + 1 < BOARD_SIZE && floodfill(x, y + 1, target, replacement, exeption, check) == 1){//down
+		floodfill(x, y, replacement, target, 50, check);//get it back to original color
+	}
+
+	return 0;
 }

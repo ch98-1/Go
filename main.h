@@ -18,8 +18,12 @@
 #define STAR 3 //star point in aray
 #define LOG "log.txt" //log file for all games
 #define HELP "Commands:\n help, -h, h, -help, or blank to display this message \n load to load file. input filename when prompted \n save to save file. input filename when prompted \n place <x> <y> to place piece on that position \n new to get new game \n turn to print out turn \n print to print out bord \n pass to pass \n quit to quit \n"
+#define MOVEBORDS memcpy(ko, last, BOARD_SIZE*BOARD_SIZE); \
+	memcpy(last, board, BOARD_SIZE*BOARD_SIZE); //move bords
 
 unsigned char board[BOARD_SIZE][BOARD_SIZE];//go board. blank is 0, black is 1, white is 2. star points is 3. board[y][x].
+unsigned char ko[BOARD_SIZE][BOARD_SIZE];//2 copy's before for checking ko rule.
+unsigned char last[BOARD_SIZE][BOARD_SIZE];//last copy of bord.
 unsigned char simulation[BOARD_SIZE][BOARD_SIZE];//copy of go board for simulations and scoring.
 unsigned char turn;//if it is black or white turn
 
@@ -61,5 +65,9 @@ int legal(unsigned char x, unsigned char y, unsigned char piece);//check if that
 void play(void);//make computer play
 
 void pass(unsigned char piece);//pass that turn
+
+void checkliberty(unsigned char x, unsigned char y, unsigned char** check);//check if it has any liberties and remove if it dosen't
+
+int floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement, unsigned char exeption, unsigned char** check);//flood fill untill complete unless there is no exeption touching it
 
 #endif
