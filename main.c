@@ -505,9 +505,8 @@ int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that
 		opponent = WHITE;//opponent is white
 	}
 	else {
-		opponent = WHITE;//opponent is black
+		opponent = BLACK;//opponent is black
 	}
-
 
 	if (simulation[x - 1][y - 1] == piece || simulation[x - 1][y - 1] == opponent){//if that space is already taken
 		return 0;//can't place where there is pieces already 
@@ -591,8 +590,8 @@ void pass(unsigned char piece){//pass that turn
 void checkliberty(unsigned char x, unsigned char y){//check if it has any liberties and remove if it dosen't
 	unsigned char piece = simulation[y - 1][x - 1];
 
-	if (floodfill(x, y, piece, 4, BLANK) == 0){//run floodfill. if it did get to exeption
-		floodfill(x, y, 4, BLANK, 5);//get it back to blank
+	if (floodfill(x, y, piece, 4, BLANK) == 0){//run floodfill. if it didn't get to exeption
+		floodfill(x, y, 4, BLANK, 5);//get it to blank
 	}
 
 }
@@ -601,7 +600,7 @@ void checkliberty(unsigned char x, unsigned char y){//check if it has any libert
 
 
 
-int floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement, unsigned char exeption){//flood fill untill complete unless there is no exeption touching it
+int floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement, unsigned char exeption){//flood fill untill complete unless there is no exeption touching it. if therer is exeption, starting point will become original color.
 	if (target == replacement){//if target is replacement
 		return 0;//go back 1 recursion
 	}
@@ -609,19 +608,24 @@ int floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned c
 		if (simulation[y - 1][x - 1] == exeption){//if at exeption
 			return 1;
 		}
+		return 0;//go back
 	}
 	simulation[y - 1][x - 1] = replacement;//replace piece
 	if (x - 1 > 0 && floodfill(x - 1, y, target, replacement, exeption) == 1){//left
-		floodfill(x, y, replacement, target, 50);//get it back to original color
+		simulation[y - 1][x - 1] = target;//get that spot to original color
+		return 1;//go back 1
 	}
 	if (x + 1 < BOARD_SIZE && floodfill(x + 1, y, target, replacement, exeption) == 1){//right
-		floodfill(x, y, replacement, target, 50);//get it back to original color
+		simulation[y - 1][x - 1] = target;//get that spot to original color
+		return 1;//go back 1
 	}
 	if (y - 1 > 0 && floodfill(x, y - 1, target, replacement, exeption) == 1){//up
-		floodfill(x, y, replacement, target, 50);//get it back to original color
+		simulation[y - 1][x - 1] = target;//get that spot to original color
+		return 1;//go back 1
 	}
 	if (y + 1 < BOARD_SIZE && floodfill(x, y + 1, target, replacement, exeption) == 1){//down
-		floodfill(x, y, replacement, target, 50);//get it back to original color
+		simulation[y - 1][x - 1] = target;//get that spot to original color
+		return 1;//go back 1
 	}
 
 	return 0;
