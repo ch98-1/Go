@@ -102,34 +102,40 @@ int main(void){//no arguments to start
 			if (xstr != NULL && ystr != NULL){//if both are valid input
 				int x = atoi(xstr);//get x and y position
 				int y = atoi(ystr);
-				if (legal(x, y, turn)){//if it is legal move
-					place(x, y, turn);//place piece
+				if (x <= BOARD_SIZE && y <= BOARD_SIZE){
+					if (legal(x, y, turn)){//if it is legal move
+						place(x, y, turn);//place piece
 
-					if (turn == BLACK){//if black's turn
-						black_pass = 0;//black didn't pass
-					}
-					else{
-						white_pass = 0;//white didn't pass
-					}
+						if (turn == BLACK){//if black's turn
+							black_pass = 0;//black didn't pass
+						}
+						else{
+							white_pass = 0;//white didn't pass
+						}
 
-					if (mode == 2){//if 2 player mode
-						if (turn == BLACK){//switch turn
-							turn = WHITE;
+						if (mode == 2){//if 2 player mode
+							if (turn == BLACK){//switch turn
+								turn = WHITE;
+							}
+							else {
+								turn = BLACK;
+							}
 						}
-						else {
-							turn = BLACK;
+						MOVEBORDS//move the bords
+							printboard();//print the bord
+						if (mode == 1){//if computer mode
+							writelog("Computer's turn\n");//log that computer is playing
+							play();//make computer play white
 						}
 					}
-					MOVEBORDS//move the bords
-					printboard();//print the bord
-					if (mode == 1){//if computer mode
-						writelog("Computer's turn\n");//log that computer is playing
-						play();//make computer play white
+					else{//if it was a illegalmove
+						printf("Illegal move\n");//irregal move
+						writelog("Illegal move\n");//write to log
 					}
 				}
-				else{//if it was a illegalmove
-					printf("Illegal move\n");//irregal move
-					writelog("Illegal move\n");//write to log
+				else{//if bad input
+				printf("Invalid input\n");//invalid input
+				writelog("Invalid input\n");//write to log
 				}
 			}
 			else{//if bad input
@@ -310,8 +316,9 @@ void place(unsigned char x, unsigned char y, unsigned char piece){//place a piec
 		opponent = WHITE;//opponent is white
 	}
 	else {
-		opponent = WHITE;//opponent is black
+		opponent = BLACK;//opponent is black
 	}
+
 	if (x - 1 > 0 && simulation[y - 1][x - 2] == opponent){//left
 		checkliberty(x - 1, y);//check for liberty
 	}
@@ -508,7 +515,7 @@ int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that
 		opponent = BLACK;//opponent is black
 	}
 
-	if (simulation[x - 1][y - 1] == piece || simulation[x - 1][y - 1] == opponent){//if that space is already taken
+	if (simulation[y - 1][x - 1] == piece || simulation[y - 1][x - 1] == opponent){//if that space is already taken
 		return 0;//can't place where there is pieces already 
 	}
 
@@ -530,7 +537,7 @@ int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that
 	}
 
 	checkliberty(x, y, simulation);//check at that place
-	if (simulation[x - 1][y - 1] != piece){//if it was suicide
+	if (simulation[y - 1][x - 1] != piece){//if it was suicide
 		return 0;//Illegal
 	}
 
@@ -589,9 +596,14 @@ void pass(unsigned char piece){//pass that turn
 
 void checkliberty(unsigned char x, unsigned char y){//check if it has any liberties and remove if it dosen't
 	unsigned char piece = simulation[y - 1][x - 1];
+	liberties = 0;//reset liberties
 
-	if (floodfill(x, y, piece, 4, BLANK) == 0){//run floodfill. if it didn't get to exeption
-		floodfill(x, y, 4, BLANK, 5);//get it to blank
+	memcpy(libertysimulation, simulation, BOARD_SIZE*BOARD_SIZE);//copy
+
+	countliberties(x, y, piece);//get number of liberties
+
+	if (liberties == 0){//if there was no liberty
+		floodfill(x, y, piece, BLANK);//floodfill to blank
 	}
 
 }
@@ -600,33 +612,90 @@ void checkliberty(unsigned char x, unsigned char y){//check if it has any libert
 
 
 
-int floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement, unsigned char exeption){//flood fill untill complete unless there is no exeption touching it. if therer is exeption, starting point will become original color.
+void floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement){//flood fill untill complete.
 	if (target == replacement){//if target is replacement
-		return 0;//go back 1 recursion
+		return;//go back
 	}
 	if (simulation[y - 1][x - 1] != target){//if node wasn't target
-		if (simulation[y - 1][x - 1] == exeption){//if at exeption
-			return 1;
-		}
-		return 0;//go back
+		return;//go back
 	}
 	simulation[y - 1][x - 1] = replacement;//replace piece
-	if (x - 1 > 0 && floodfill(x - 1, y, target, replacement, exeption) == 1){//left
-		simulation[y - 1][x - 1] = target;//get that spot to original color
-		return 1;//go back 1
+
+	//check for all star points
+	//4,4 points
+	if (x == 4 && y == 4){//if at star point
+		simulation[y - 1][x - 1] = STAR;//place star there
 	}
-	if (x + 1 < BOARD_SIZE && floodfill(x + 1, y, target, replacement, exeption) == 1){//right
-		simulation[y - 1][x - 1] = target;//get that spot to original color
-		return 1;//go back 1
+	if (x == 4 && y == 16){//if at star point
+		simulation[y - 1][x - 1] = STAR;//place star there
 	}
-	if (y - 1 > 0 && floodfill(x, y - 1, target, replacement, exeption) == 1){//up
-		simulation[y - 1][x - 1] = target;//get that spot to original color
-		return 1;//go back 1
+	if (x == 16 && y == 4){//if at star point
+		simulation[y - 1][x - 1] = STAR;//place star there
 	}
-	if (y + 1 < BOARD_SIZE && floodfill(x, y + 1, target, replacement, exeption) == 1){//down
-		simulation[y - 1][x - 1] = target;//get that spot to original color
-		return 1;//go back 1
+	if (x == 16 && y == 16){//if at star point
+		simulation[y - 1][x - 1] = STAR;//place star there
+	}
+	//4,10 points
+	if (x == 4 && y == 10){//if at star point
+		simulation[y - 1][x - 1] = STAR;//place star there
+	}
+	if (x == 10 && y == 4){//if at star point
+		simulation[y - 1][x - 1] = STAR;//place star there
+	}
+	if (x == 10 && y == 16){//if at star point
+		simulation[y - 1][x - 1] = STAR;//place star there
+	}
+	if (x == 16 && y == 10){//if at star point
+		simulation[y - 1][x - 1] = STAR;//place star there
+	}
+	//10,10 points
+	if (x == 10 && y == 10){//if at star point
+		simulation[y - 1][x - 1] = STAR;//place star there
 	}
 
-	return 0;
+	if (x - 1 > 0){//left
+		floodfill(x - 1, y, target, replacement);//flood fill that direction
+	}
+	if (x + 1 < BOARD_SIZE){//right
+		floodfill(x + 1, y, target, replacement);//flood fill that direction
+	}
+	if (y - 1 > 0){//up
+		floodfill(x, y - 1, target, replacement);//floodfill that direction
+	}
+	if (y + 1 < BOARD_SIZE){//down
+		floodfill(x, y + 1, target, replacement);//floodfill that direction
+	}
+
+	return;//go back
+}
+
+
+
+
+
+
+void countliberties(unsigned char x, unsigned char y, unsigned char piece){//get number of liberties
+	if (libertysimulation[y - 1][x - 1] != piece){//if node wasn't target
+		if (libertysimulation[y - 1][x - 1] == BLANK){//if it was blank
+			liberties++;//add one to liberties
+		}
+		return;//go back
+	}
+	libertysimulation[y - 1][x - 1] = 4;//replace piece
+	if (x - 1 > 0){//left
+		countliberties(x - 1, y, piece);//count liberties that direction
+	}
+	if (x + 1 < BOARD_SIZE){//right
+		countliberties(x + 1, y, piece);//count liberties that direction
+	}
+	if (y - 1 > 0){//up
+		countliberties(x, y - 1, piece);//count liberties that direction
+	}
+	if (y + 1 < BOARD_SIZE){//down
+		countliberties(x, y + 1, piece);//count liberties that direction
+	}
+
+	return;//go back
+
+
 }

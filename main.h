@@ -25,6 +25,8 @@ unsigned char board[BOARD_SIZE][BOARD_SIZE];//go board. blank is 0, black is 1, 
 unsigned char ko[BOARD_SIZE][BOARD_SIZE];//2 copy's before for checking ko rule.
 unsigned char last[BOARD_SIZE][BOARD_SIZE];//last copy of bord.
 unsigned char simulation[BOARD_SIZE][BOARD_SIZE];//copy of go board for simulations and scoring.
+unsigned char libertysimulation[BOARD_SIZE][BOARD_SIZE];//copy of go board for simulations on liberty counting
+
 unsigned char turn;//if it is black or white turn
 
 unsigned int black_captured;//number of black captured
@@ -39,6 +41,8 @@ unsigned int black_territory_score;//territory / japanese scoring for black
 unsigned int white_territory_score;//territory / japanese scoring for white
 
 unsigned char mode;//game mode. 1 for computer vs human 2 for human vs human black is human. number of human players
+
+unsigned char liberties;//number of liberties
 
 
 FILE* logfile;//logfile
@@ -68,6 +72,8 @@ void pass(unsigned char piece);//pass that turn
 
 void checkliberty(unsigned char x, unsigned char y);//check if it has any liberties and remove if it dosen't
 
-int floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement, unsigned char exeption);//flood fill untill complete unless there is no exeption touching it. if therer is exeption, starting point will become original color.
+void floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement);//flood fill untill complete.
+
+void countliberties(unsigned char x, unsigned char y, unsigned char piece);//get number of liberties
 
 #endif
