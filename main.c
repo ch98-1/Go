@@ -309,29 +309,32 @@ void place(unsigned char x, unsigned char y, unsigned char piece){//place a piec
 		}
 	}
 
-	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
 
-	unsigned char opponent;//opponent on array
-	if (piece == BLACK){//if black
-		opponent = WHITE;//opponent is white
-	}
-	else {
-		opponent = BLACK;//opponent is black
-	}
+	if (piece == BLACK || piece == WHITE){//if one of them is stones
+		memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
 
-	if (x - 1 > 0 && simulation[y - 1][x - 2] == opponent){//left
-		checkliberty(x - 1, y);//check for liberty
+		unsigned char opponent;//opponent on array
+		if (piece == BLACK){//if black
+			opponent = WHITE;//opponent is white
+		}
+		else {
+			opponent = BLACK;//opponent is black
+		}
+
+		if (x - 1 > 0 && simulation[y - 1][x - 2] == opponent){//left
+			checkliberty(x - 1, y);//check for liberty
+		}
+		if (x + 1 < BOARD_SIZE && simulation[y - 1][x] == opponent){//right
+			checkliberty(x + 1, y);//check for liberty
+		}
+		if (y - 1 > 0 && simulation[y - 2][x - 1] == opponent){//up
+			checkliberty(x, y - 1);//check for liberty
+		}
+		if (y + 1 < BOARD_SIZE && simulation[y][x - 1] == opponent){//down
+			checkliberty(x, y + 1);//check for liberty
+		}
+		memcpy(board, simulation, BOARD_SIZE*BOARD_SIZE);//copy back
 	}
-	if (x + 1 < BOARD_SIZE && simulation[y - 1][x] == opponent){//right
-		checkliberty(x + 1, y);//check for liberty
-	}
-	if (y - 1 > 0 && simulation[y - 2][x - 1] == opponent){//up
-		checkliberty(x, y - 1);//check for liberty
-	}
-	if (y + 1 < BOARD_SIZE && simulation[y][x - 1] == opponent){//down
-		checkliberty(x, y + 1);//check for liberty
-	}
-	memcpy(board, simulation, BOARD_SIZE*BOARD_SIZE);//copy back
 }
 
 
@@ -525,23 +528,48 @@ int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that
 
 	if (x - 1 > 0 && simulation[y - 1][x - 2] == opponent){//left
 		checkliberty(x - 1, y, simulation);//check for liberty
+		if (simulation[y - 1][x - 2] == BLANK) {
+			if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
+				return 0;//Illegal by ko rule
+			}
+			return 1;//took opponent before suicide
+		}
 	}
 	if (x + 1 < BOARD_SIZE && simulation[y - 1][x] == opponent){//right
 		checkliberty(x + 1, y, simulation);//check for liberty
+		if (simulation[y - 1][x] == BLANK) {
+			if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
+				return 0;//Illegal by ko rule
+			}
+			return 1;//took opponent before suicide
+		}
 	}
 	if (y - 1 > 0 && simulation[y - 2][x - 1] == opponent){//up
 		checkliberty(x, y - 1, simulation);//check for liberty
+		if (simulation[y - 2][x - 1] == BLANK) {
+			if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
+				return 0;//Illegal by ko rule
+			}
+			return 1;//took opponent before suicide
+		}
 	}
 	if (y + 1 < BOARD_SIZE && simulation[y][x - 1] == opponent){//down
 		checkliberty(x, y + 1, simulation);//check for liberty
+		if (simulation[y][x - 1] == BLANK) {
+			if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
+				return 0;//Illegal by ko rule
+			}
+			return 1;//took opponent before suicide
+		}
 	}
 
 	checkliberty(x, y, simulation);//check at that place
+
 	if (simulation[y - 1][x - 1] != piece){//if it was suicide
 		return 0;//Illegal
 	}
 
-	if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last bord
+	if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
 		return 0;//Illegal by ko rule
 	}
 
