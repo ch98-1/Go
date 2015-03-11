@@ -197,19 +197,24 @@ void printboard(void){//print out bord following the macros with space between e
 			switch (board[i][j]){
 			case BLACK://black
 				printf(BLACK_PIECE);//print black
+				putlog(BLACK_PIECE);//log black
 				break;
 			case WHITE://white
 				printf(WHITE_PIECE);//print white
+				putlog(WHITE_PIECE);//log white
 				break;
 			case STAR://spacial
-				printf(STAR_POINT);//print white
+				printf(STAR_POINT);//print star
+				putlog(STAR_POINT);//log star
 				break;
 			default://blank
-				printf(BLANK_POINT);//blank piece
+				printf(BLANK_POINT);//blank point
+				putlog(BLANK_POINT);//log blank
 				break;
 			}
 		}
 		printf("\n");//newline
+		putlog("\n");//put newline in log
 	}
 	if (mode == 2){//if at mode 2
 		if (turn == BLACK){//display turn
@@ -532,6 +537,14 @@ void writelog(const char* message){//write message in to log file
 	status = fputs("\n", logfile);//write newline
 	if (status == EOF){//if data wasn't written
 		printf("Could not write lo log file %s. Plese check the file permission.\n Message was %s", LOG, message);//give error message
+		return;//end function
+	}
+}
+
+void putlog(const char* message){//write message in to log file without added newline
+	int status = fputs(message, logfile);//write message and get status
+	if (status == EOF){//if data wasn't written
+		printf("Could not write lo log file %s. Plese check the file permission.\n Message was %s\n", LOG, message);//give error message
 		return;//end function
 	}
 }

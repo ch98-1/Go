@@ -65,6 +65,8 @@ void load(const char* file);//load board from file
 
 void writelog(const char* message);//write message in to log file
 
+void putlog(const char* message);//write message in to log file without added newline
+
 int legal(unsigned char x, unsigned char y, unsigned char piece);//check if that move is legal
 
 void play(void);//make computer play
