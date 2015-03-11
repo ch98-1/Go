@@ -158,6 +158,7 @@ int main(void){//no arguments to start
 			writelog(input);//log score
 			
 			printf("do you want to save? (y/n): ");//prompt if you want to save or not
+			writelog("do you want to save? (y/n): ");//log prompt
 			gets(input);//get input
 			writelog(input);//log input
 			if (strcmp(input, "y") == 0) {//if input is y
@@ -405,14 +406,29 @@ void save(const char* file){//save board to file
 			}
 		}
 	}
-	int piece = fputc(turn, data);//write turn
-	if (piece == EOF){
+
+	int filedata;//get EOF
+
+	filedata = fputc(turn, data);//write turn
+	if (filedata == EOF){//if at end of file
 		printf("data could not be written correctly. Check permission of %s\n", file);//give error message
 		writelog("data could not be written correctly. Check permission of the file\n");//log error message
 		return;//end function
 	}
-	piece = fputc(mode, data);//write mode
-	if (mode == EOF){
+	filedata = fputc(mode, data);//write mode
+	if (filedata == EOF){//if at end of file
+		printf("data could not be written correctly. Check permission of %s\n", file);//give error message
+		writelog("data could not be written correctly. Check permission of the file\n");//log error message
+		return;//end function
+	}
+	filedata = fputc(black_pass, data);//write black pass
+	if (filedata == EOF){//if at end of file
+		printf("data could not be written correctly. Check permission of %s\n", file);//give error message
+		writelog("data could not be written correctly. Check permission of the file\n");//log error message
+		return;//end function
+	}
+	filedata = fputc(white_pass, data);//write white pass
+	if (filedata == EOF){//if at end of file
 		printf("data could not be written correctly. Check permission of %s\n", file);//give error message
 		writelog("data could not be written correctly. Check permission of the file\n");//log error message
 		return;//end function
@@ -469,18 +485,35 @@ void load(const char* file){//load board to file
 			ko[i][j] = piece;
 		}
 	}
-	turn = fgetc(data);//load turn
-	if (turn == EOF){
+	int filedata;//data from file
+	filedata = fgetc(data);//load turn
+	if (filedata == EOF){
 		printf("End of file reached. Data is not in a correct format.\n");//give error message
 		writelog("End of file reached. Data is not in a correct format.\n");//log error message
 		return;//end function
 	}
-	mode = fgetc(data);//load mode
-	if (mode == EOF){
+	else turn = filedata;//copy data
+	filedata = fgetc(data);//load mode
+	if (filedata == EOF){
 		printf("End of file reached. Data is not in a correct format.\n");//give error message
 		writelog("End of file reached. Data is not in a correct format.\n");//log error message
 		return;//end function
 	}
+	else mode = filedata;//copy data
+	filedata = fgetc(data);//load black pass
+	if (filedata == EOF){
+		printf("End of file reached. Data is not in a correct format.\n");//give error message
+		writelog("End of file reached. Data is not in a correct format.\n");//log error message
+		return;//end function
+	}
+	else black_pass = filedata;//copy data
+	filedata = fgetc(data);//load white pass
+	if (filedata == EOF){
+		printf("End of file reached. Data is not in a correct format.\n");//give error message
+		writelog("End of file reached. Data is not in a correct format.\n");//log error message
+		return;//end function
+	}
+	else white_pass = filedata;//copy data
 	fclose(data);//close file
 }
 
@@ -524,58 +557,44 @@ int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that
 
 
 	simulation[y - 1][x - 1] = piece;//place that piece
-	
-	memcpy(simulationcopy, simulation, BOARD_SIZE*BOARD_SIZE);//copy
-	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
+
+
+	int skipsuicide = 0;//if skipping suicide check
 	if (x - 1 > 0 && simulation[y - 1][x - 2] == opponent){//left
 		simulation[y - 1][x - 1] = piece;//place that piece
 		checkliberty(x - 1, y);//check for liberty
-		if (liberties == 0) {
-			if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
-				return 0;//Illegal by ko rule
-			}
-			return 1;//took opponent before suicide
+		if (liberties == 0) {//if there was no liberties
+			skipsuicide = 1;//took opponent before suicide
 		}
 	}
-	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy back
 	if (x + 1 < BOARD_SIZE && simulation[y - 1][x] == opponent){//right
 		simulation[y - 1][x - 1] = piece;//place that piece
 		checkliberty(x + 1, y);//check for liberty
-		if (liberties == 0) {
-			if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
-				return 0;//Illegal by ko rule
-			}
-			return 1;//took opponent before suicide
+		if (liberties == 0) {//if there was no liberties
+			skipsuicide = 1;//took opponent before suicide
 		}
 	}
-	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy back
 	if (y - 1 > 0 && simulation[y - 2][x - 1] == opponent){//up
 		simulation[y - 1][x - 1] = piece;//place that piece
 		checkliberty(x, y - 1);//check for liberty
-		if (liberties == 0) {
-			if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
-				return 0;//Illegal by ko rule
-			}
-			return 1;//took opponent before suicide
+		if (liberties == 0) {//if there was no liberties
+			skipsuicide = 1;//took opponent before suicide
 		}
 	}
-	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy back
 	if (y + 1 < BOARD_SIZE && simulation[y][x - 1] == opponent){//down
 		simulation[y - 1][x - 1] = piece;//place that piece
 		checkliberty(x, y + 1, simulation);//check for liberty
-		if (liberties == 0) {
-			if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
-				return 0;//Illegal by ko rule
-			}
-			return 1;//took opponent before suicide
+		if (liberties == 0) {//if there was no liberties
+			skipsuicide = 1;//took opponent before suicide
 		}
 	}
-	memcpy(simulation, simulationcopy, BOARD_SIZE*BOARD_SIZE);//copy back
 
-	checkliberty(x, y);//check at that place
+	if (skipsuicide == 0){//if not skipping suicide check
+		checkliberty(x, y);//check at that place
 
-	if (simulation[y - 1][x - 1] != piece){//if it was suicide
-		return 0;//Illegal
+		if (simulation[y - 1][x - 1] != piece){//if it was suicide
+			return 0;//Illegal
+		}
 	}
 
 	if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
