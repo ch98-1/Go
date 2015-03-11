@@ -39,8 +39,7 @@ int main(void){//no arguments to start
 			printf("Please input the filename: ");//prompt to enter the file
 			gets(input);//get input
 			writelog(input);//log input
-			load(input);//load input
-			printboard();//print bord
+			load(input);//save input
 		}
 
 
