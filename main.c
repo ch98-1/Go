@@ -609,31 +609,6 @@ int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that
 
 
 
-void play(void){//make computer play
-	//random play
-	//make better algorithm
-	srand(time(NULL));//seed rng with time
-	int x = rand() % (BOARD_SIZE);//get random move
-	int y = rand() % (BOARD_SIZE);
-	while (legal(x, y, WHITE) == 0){//while it is not a legal move
-		int x = rand() % (BOARD_SIZE);//get new random move
-		int y = rand() % (BOARD_SIZE);
-	}
-	place(x, y, WHITE);//place that piece
-	char move[64];//move in string
-	sprintf(move, "White move at %d %d\n", x, y);//make move into string
-	printf("%s", move);//print that move
-	writelog(move);//log that move
-	printboard();//print board
-	printf("Black's Turn\n");//display turn
-	writelog("Black's Turn\n");//log turn
-	MOVEBORDS//move bords
-}
-
-
-
-
-
 
 
 void pass(unsigned char piece){//pass that turn
@@ -754,4 +729,30 @@ void countliberties(unsigned char x, unsigned char y, unsigned char piece){//get
 	return;//go back
 
 
+}
+
+
+
+
+
+
+void play(void){//make computer play
+	//random play
+	//make better algorithm
+	srand(time(NULL));//seed rng with time
+	int x = rand() % (BOARD_SIZE);//get random move
+	int y = rand() % (BOARD_SIZE);
+	while (legal(x, y, WHITE) == 0){//while it is not a legal move
+		int x = rand() % (BOARD_SIZE);//get new random move
+		int y = rand() % (BOARD_SIZE);
+	}
+	place(x, y, WHITE);//place that piece
+	char move[64];//move in string
+	sprintf(move, "White move at %d %d\n", x, y);//make move into string
+	printf("%s", move);//print that move
+	writelog(move);//log that move
+	printboard();//print board
+	printf("Black's Turn\n");//display turn
+	writelog("Black's Turn\n");//log turn
+	MOVEBORDS//move bords
 }
