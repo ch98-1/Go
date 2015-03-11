@@ -469,7 +469,7 @@ void load(const char* file){//load board to file
 			ko[i][j] = piece;
 		}
 	}
-	int turn = fgetc(data);//load turn
+	turn = fgetc(data);//load turn
 	if (turn == EOF){
 		printf("End of file reached. Data is not in a correct format.\n");//give error message
 		writelog("End of file reached. Data is not in a correct format.\n");//log error message
@@ -524,46 +524,55 @@ int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that
 
 
 	simulation[y - 1][x - 1] = piece;//place that piece
-
-
+	
+	memcpy(simulationcopy, simulation, BOARD_SIZE*BOARD_SIZE);//copy
+	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
 	if (x - 1 > 0 && simulation[y - 1][x - 2] == opponent){//left
-		checkliberty(x - 1, y, simulation);//check for liberty
-		if (simulation[y - 1][x - 2] == BLANK) {
+		simulation[y - 1][x - 1] = piece;//place that piece
+		checkliberty(x - 1, y);//check for liberty
+		if (liberties == 0) {
 			if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
 				return 0;//Illegal by ko rule
 			}
 			return 1;//took opponent before suicide
 		}
 	}
+	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy back
 	if (x + 1 < BOARD_SIZE && simulation[y - 1][x] == opponent){//right
-		checkliberty(x + 1, y, simulation);//check for liberty
-		if (simulation[y - 1][x] == BLANK) {
+		simulation[y - 1][x - 1] = piece;//place that piece
+		checkliberty(x + 1, y);//check for liberty
+		if (liberties == 0) {
 			if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
 				return 0;//Illegal by ko rule
 			}
 			return 1;//took opponent before suicide
 		}
 	}
+	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy back
 	if (y - 1 > 0 && simulation[y - 2][x - 1] == opponent){//up
-		checkliberty(x, y - 1, simulation);//check for liberty
-		if (simulation[y - 2][x - 1] == BLANK) {
+		simulation[y - 1][x - 1] = piece;//place that piece
+		checkliberty(x, y - 1);//check for liberty
+		if (liberties == 0) {
 			if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
 				return 0;//Illegal by ko rule
 			}
 			return 1;//took opponent before suicide
 		}
 	}
+	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy back
 	if (y + 1 < BOARD_SIZE && simulation[y][x - 1] == opponent){//down
+		simulation[y - 1][x - 1] = piece;//place that piece
 		checkliberty(x, y + 1, simulation);//check for liberty
-		if (simulation[y][x - 1] == BLANK) {
+		if (liberties == 0) {
 			if (memcmp(ko, simulation, BOARD_SIZE*BOARD_SIZE) == 0){//if it was same as last last board
 				return 0;//Illegal by ko rule
 			}
 			return 1;//took opponent before suicide
 		}
 	}
+	memcpy(simulation, simulationcopy, BOARD_SIZE*BOARD_SIZE);//copy back
 
-	checkliberty(x, y, simulation);//check at that place
+	checkliberty(x, y);//check at that place
 
 	if (simulation[y - 1][x - 1] != piece){//if it was suicide
 		return 0;//Illegal
@@ -629,7 +638,7 @@ void checkliberty(unsigned char x, unsigned char y){//check if it has any libert
 	memcpy(libertysimulation, simulation, BOARD_SIZE*BOARD_SIZE);//copy
 
 	countliberties(x, y, piece);//get number of liberties
-
+	
 	if (liberties == 0){//if there was no liberty
 		floodfill(x, y, piece, BLANK);//floodfill to blank
 	}

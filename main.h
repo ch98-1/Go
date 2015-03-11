@@ -26,6 +26,7 @@ unsigned char ko[BOARD_SIZE][BOARD_SIZE];//2 copy's before for checking ko rule.
 unsigned char last[BOARD_SIZE][BOARD_SIZE];//last copy of bord.
 unsigned char simulation[BOARD_SIZE][BOARD_SIZE];//copy of go board for simulations and scoring.
 unsigned char libertysimulation[BOARD_SIZE][BOARD_SIZE];//copy of go board for simulations on liberty counting
+unsigned char simulationcopy[BOARD_SIZE][BOARD_SIZE];//copy of copy of go board for simulations on liberty counting
 
 unsigned char turn;//if it is black or white turn
 
