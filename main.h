@@ -45,6 +45,12 @@ unsigned char mode;//game mode. 1 for computer vs human 2 for human vs human bla
 
 unsigned char liberties;//number of liberties
 
+unsigned char eyes;//number of eyes
+
+unsigned char touching_black;//ouching black
+unsigned char touching_white;//touching white
+unsigned char touching_blank;//touching white
+
 
 FILE* logfile;//logfile
 
@@ -78,5 +84,11 @@ void checkliberty(unsigned char x, unsigned char y);//check if it has any libert
 void floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned char replacement);//flood fill untill complete.
 
 void countliberties(unsigned char x, unsigned char y, unsigned char piece);//get number of liberties
+
+void removedead();//remove all dead piece on board
+
+void counteyes(unsigned char x, unsigned char y, unsigned char piece);//get number of eyes
+
+void checktouching(unsigned char x, unsigned char y, unsigned char piece);//check which colors that space is touching
 
 #endif

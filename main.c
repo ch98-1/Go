@@ -350,7 +350,8 @@ void place(unsigned char x, unsigned char y, unsigned char piece){//place a piec
 
 
 void territoryscore(void){//count score for territory / japanese scoring
-	//need code
+	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
+	removedead();//remove all dead pieces
 
 }
 
@@ -360,8 +361,31 @@ void territoryscore(void){//count score for territory / japanese scoring
 
 
 void areascore(void){//count score for area / chinese scoring
-	//need code
+	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
+	removedead();//remove all dead pieces
 
+}
+
+
+
+
+
+
+void removedead(){//remove all dead piece on board
+	memcpy(libertysimulation, simulation, BOARD_SIZE*BOARD_SIZE);//copy
+	int y, x;
+	for (y = 1; y <= BOARD_SIZE; y++){//each row
+		for (x = 1; x <= BOARD_SIZE; x++){//each position
+			unsigned char piece = simulation[y - 1][x - 1];//get piece
+			eyes = 0;//reset eye count
+			if (piece == BLACK || piece == WHITE){//if piece was black or white
+				counteyes(x, y, piece);//get number of eyes
+				if (eyes < 2){//if there is less then 2 eyes
+					floodfill(x, y, piece, BLANK);//floodfill to blank
+				}
+			}
+		}
+	}
 }
 
 
@@ -540,6 +564,12 @@ void writelog(const char* message){//write message in to log file
 		return;//end function
 	}
 }
+
+
+
+
+
+
 
 void putlog(const char* message){//write message in to log file without added newline
 	int status = fputs(message, logfile);//write message and get status
@@ -742,6 +772,81 @@ void countliberties(unsigned char x, unsigned char y, unsigned char piece){//get
 
 	return;//go back
 
+
+}
+
+
+
+
+
+
+
+void counteyes(unsigned char x, unsigned char y, unsigned char piece){//get number of eyes
+	if (libertysimulation[y - 1][x - 1] != piece){//if node wasn't target
+		if (libertysimulation[y - 1][x - 1] == BLANK){//if it was blank
+			memcpy(simulationcopy, simulation, BOARD_SIZE*BOARD_SIZE);//copy
+			touching_black = 0;//reset black
+			touching_white = 0;//reset white
+			checktouching(x, y, BLANK);//check which colors that space is touching
+			if (!(touching_black && touching_white)){//if only touching one color
+				floodfill(x, y, BLANK, 4);//floodfill that eye
+				eyes++;//add one to liberties
+			}
+		}
+		return;//go back
+	}
+	libertysimulation[y - 1][x - 1] = 4;//replace piece
+	if (x - 1 > 0){//left
+		counteyes(x - 1, y, piece);//count liberties that direction
+	}
+	if (x + 1 < BOARD_SIZE){//right
+		counteyes(x + 1, y, piece);//count liberties that direction
+	}
+	if (y - 1 > 0){//up
+		counteyes(x, y - 1, piece);//count liberties that direction
+	}
+	if (y + 1 < BOARD_SIZE){//down
+		counteyes(x, y + 1, piece);//count liberties that direction
+	}
+
+	return;//go back
+
+}
+
+
+
+
+
+
+void checktouching(unsigned char x, unsigned char y, unsigned char piece){//check which colors that space is touching
+	if(simulationcopy[y - 1][x - 1] == BLACK){//if node wasn't target
+		touching_black++;//it is touching black
+	}
+	if (simulationcopy[y - 1][x - 1] == WHITE){//if node wasn't target
+		touching_white++;//it is touching black
+	}
+	if (simulationcopy[y - 1][x - 1] == BLANK || simulation[y - 1][x - 1] == STAR){//if node wasn't target
+		touching_blank++;//it is touching black
+	}
+
+	if (simulationcopy[y - 1][x - 1] != piece){//if node wasn't target
+		return;//go back
+	} 
+	simulationcopy[y - 1][x - 1] = 4;//mark that piece
+	if (x - 1 > 0){//left
+		checktouching(x - 1, y, piece);//count liberties that direction
+	}
+	if (x + 1 < BOARD_SIZE){//right
+		checktouching(x + 1, y, piece);//count liberties that direction
+	}
+	if (y - 1 > 0){//up
+		checktouching(x, y - 1, piece);//count liberties that direction
+	}
+	if (y + 1 < BOARD_SIZE){//down
+		checktouching(x, y + 1, piece);//count liberties that direction
+	}
+
+	return;//go back
 
 }
 
