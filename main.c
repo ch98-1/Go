@@ -239,6 +239,16 @@ void init(void){//initialise variables and load other things
 	turn = BLACK;//black turn at start
 	printf("\n");//newline to make sure it is in next line
 	memset(board, 0, BOARD_SIZE*BOARD_SIZE);//clear board
+	memset(last, 0, BOARD_SIZE*BOARD_SIZE);//clear last board
+	memset(ko, 0, BOARD_SIZE*BOARD_SIZE);//clear ko board
+	black_area_score = 0;//reset score values
+	white_area_score = 0;
+	black_territory_score = 0;
+	white_territory_score = 0;
+	black_captured = 0;//reset captured number
+	white_captured = 0;
+	black_pass = 0;//reset pass
+	white_pass = 0;
 	//place / mark star points
 	//4,4 points
 	place(4, 4, STAR);
@@ -363,7 +373,22 @@ void territoryscore(void){//count score for territory / japanese scoring
 void areascore(void){//count score for area / chinese scoring
 	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
 	removedead();//remove all dead pieces
-
+	int y, x;
+	for (y = 1; y <= BOARD_SIZE; y++){//each row
+		for (x = 1; x <= BOARD_SIZE; x++){//each position
+			memcpy(simulationcopy, simulation, BOARD_SIZE*BOARD_SIZE);//copy
+			touching_black = 0;//reset black
+			touching_white = 0;//reset white
+			touching_blank = 0;//reset blank
+			checktouching(x, y, BLANK);//check which colors that space is touching
+			if (touching_black > 0 && touching_white == 0){//if touching black piece only
+				black_area_score++;//addone to black score
+			}
+			if (touching_white > 0 && touching_black == 0){//if touching white piece only
+				white_area_score++;//addone to white score
+			}
+		}
+	}
 }
 
 
@@ -376,7 +401,8 @@ void removedead(){//remove all dead piece on board
 	int y, x;
 	for (y = 1; y <= BOARD_SIZE; y++){//each row
 		for (x = 1; x <= BOARD_SIZE; x++){//each position
-			unsigned char piece = simulation[y - 1][x - 1];//get piece
+			if (simulation[y - 1][x - 1] == STAR) simulation[y - 1][x - 1] = BLANK;//replace star with blank
+			unsigned char piece = libertysimulation[y - 1][x - 1];//get piece
 			eyes = 0;//reset eye count
 			if (piece == BLACK || piece == WHITE){//if piece was black or white
 				counteyes(x, y, piece);//get number of eyes
@@ -611,7 +637,7 @@ int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that
 			skipsuicide = 1;//took opponent before suicide
 		}
 	}
-	if (x + 1 < BOARD_SIZE && simulation[y - 1][x] == opponent){//right
+	if (x + 1 <= BOARD_SIZE && simulation[y - 1][x] == opponent){//right
 		simulation[y - 1][x - 1] = piece;//place that piece
 		checkliberty(x + 1, y);//check for liberty
 		if (liberties == 0) {//if there was no liberties
@@ -625,7 +651,7 @@ int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that
 			skipsuicide = 1;//took opponent before suicide
 		}
 	}
-	if (y + 1 < BOARD_SIZE && simulation[y][x - 1] == opponent){//down
+	if (y + 1 <= BOARD_SIZE && simulation[y][x - 1] == opponent){//down
 		simulation[y - 1][x - 1] = piece;//place that piece
 		checkliberty(x, y + 1, simulation);//check for liberty
 		if (liberties == 0) {//if there was no liberties
@@ -731,13 +757,13 @@ void floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned 
 	if (x - 1 > 0){//left
 		floodfill(x - 1, y, target, replacement);//flood fill that direction
 	}
-	if (x + 1 < BOARD_SIZE){//right
+	if (x + 1 <= BOARD_SIZE){//right
 		floodfill(x + 1, y, target, replacement);//flood fill that direction
 	}
 	if (y - 1 > 0){//up
 		floodfill(x, y - 1, target, replacement);//floodfill that direction
 	}
-	if (y + 1 < BOARD_SIZE){//down
+	if (y + 1 <= BOARD_SIZE){//down
 		floodfill(x, y + 1, target, replacement);//floodfill that direction
 	}
 
@@ -760,13 +786,13 @@ void countliberties(unsigned char x, unsigned char y, unsigned char piece){//get
 	if (x - 1 > 0){//left
 		countliberties(x - 1, y, piece);//count liberties that direction
 	}
-	if (x + 1 < BOARD_SIZE){//right
+	if (x + 1 <= BOARD_SIZE){//right
 		countliberties(x + 1, y, piece);//count liberties that direction
 	}
 	if (y - 1 > 0){//up
 		countliberties(x, y - 1, piece);//count liberties that direction
 	}
-	if (y + 1 < BOARD_SIZE){//down
+	if (y + 1 <= BOARD_SIZE){//down
 		countliberties(x, y + 1, piece);//count liberties that direction
 	}
 
@@ -783,10 +809,11 @@ void countliberties(unsigned char x, unsigned char y, unsigned char piece){//get
 
 void counteyes(unsigned char x, unsigned char y, unsigned char piece){//get number of eyes
 	if (libertysimulation[y - 1][x - 1] != piece){//if node wasn't target
-		if (libertysimulation[y - 1][x - 1] == BLANK){//if it was blank
+		if (libertysimulation[y - 1][x - 1] == BLANK || libertysimulation[y - 1][x - 1] == STAR || libertysimulation[y - 1][x - 1] == 4){//if it was blank
 			memcpy(simulationcopy, simulation, BOARD_SIZE*BOARD_SIZE);//copy
 			touching_black = 0;//reset black
 			touching_white = 0;//reset white
+			touching_blank = 0;//reset blank
 			checktouching(x, y, BLANK);//check which colors that space is touching
 			if (!(touching_black && touching_white)){//if only touching one color
 				floodfill(x, y, BLANK, 4);//floodfill that eye
@@ -795,7 +822,7 @@ void counteyes(unsigned char x, unsigned char y, unsigned char piece){//get numb
 		}
 		return;//go back
 	}
-	libertysimulation[y - 1][x - 1] = 4;//replace piece
+	libertysimulation[y - 1][x - 1] = 5;//replace piece
 	if (x - 1 > 0){//left
 		counteyes(x - 1, y, piece);//count liberties that direction
 	}
@@ -819,13 +846,13 @@ void counteyes(unsigned char x, unsigned char y, unsigned char piece){//get numb
 
 
 void checktouching(unsigned char x, unsigned char y, unsigned char piece){//check which colors that space is touching
-	if(simulationcopy[y - 1][x - 1] == BLACK){//if node wasn't target
+	if(simulationcopy[y - 1][x - 1] == BLACK){//if node was black
 		touching_black++;//it is touching black
 	}
-	if (simulationcopy[y - 1][x - 1] == WHITE){//if node wasn't target
+	if (simulationcopy[y - 1][x - 1] == WHITE){//if node was white
 		touching_white++;//it is touching black
 	}
-	if (simulationcopy[y - 1][x - 1] == BLANK || simulation[y - 1][x - 1] == STAR){//if node wasn't target
+	if (simulationcopy[y - 1][x - 1] == BLANK || simulation[y - 1][x - 1] == STAR){//if node was blank
 		touching_blank++;//it is touching black
 	}
 
@@ -836,13 +863,13 @@ void checktouching(unsigned char x, unsigned char y, unsigned char piece){//chec
 	if (x - 1 > 0){//left
 		checktouching(x - 1, y, piece);//count liberties that direction
 	}
-	if (x + 1 < BOARD_SIZE){//right
+	if (x + 1 <= BOARD_SIZE){//right
 		checktouching(x + 1, y, piece);//count liberties that direction
 	}
 	if (y - 1 > 0){//up
 		checktouching(x, y - 1, piece);//count liberties that direction
 	}
-	if (y + 1 < BOARD_SIZE){//down
+	if (y + 1 <= BOARD_SIZE){//down
 		checktouching(x, y + 1, piece);//count liberties that direction
 	}
 
