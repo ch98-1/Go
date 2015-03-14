@@ -653,7 +653,7 @@ int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that
 	}
 	if (y + 1 <= BOARD_SIZE && simulation[y][x - 1] == opponent){//down
 		simulation[y - 1][x - 1] = piece;//place that piece
-		checkliberty(x, y + 1, simulation);//check for liberty
+		checkliberty(x, y + 1);//check for liberty
 		if (liberties == 0) {//if there was no liberties
 			skipsuicide = 1;//took opponent before suicide
 		}
