@@ -380,12 +380,20 @@ void areascore(void){//count score for area / chinese scoring
 			touching_black = 0;//reset black
 			touching_white = 0;//reset white
 			touching_blank = 0;//reset blank
-			checktouching(x, y, BLANK);//check which colors that space is touching
-			if (touching_black > 0 && touching_white == 0){//if touching black piece only
-				black_area_score++;//addone to black score
+			if (simulationcopy[y - 1][x - 1] == BLACK){
+				black_area_score++;//add one to black score
 			}
-			if (touching_white > 0 && touching_black == 0){//if touching white piece only
-				white_area_score++;//addone to white score
+			if (simulationcopy[y - 1][x - 1] == WHITE){
+				white_area_score++;//add one to white score
+			}
+			if (simulationcopy[y - 1][x - 1] == BLANK){
+				checktouching(x, y, BLANK);//check which colors that space is touching
+				if (touching_black > 0 && touching_white == 0){//if touching black piece only
+					black_area_score++;//add one to black score
+				}
+				if (touching_white > 0 && touching_black == 0){//if touching white piece only
+					white_area_score++;//add one to white score
+				}
 			}
 		}
 	}
