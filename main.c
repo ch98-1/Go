@@ -386,7 +386,7 @@ void areascore(void){//count score for area / chinese scoring
 			if (simulationcopy[y - 1][x - 1] == WHITE){
 				white_area_score++;//add one to white score
 			}
-			if (simulationcopy[y - 1][x - 1] == BLANK){
+			if (simulationcopy[y - 1][x - 1] == BLANK){//if blank
 				checktouching(x, y, BLANK);//check which colors that space is touching
 				if (touching_black > 0 && touching_white == 0){//if touching black piece only
 					black_area_score++;//add one to black score
@@ -418,6 +418,10 @@ void removedead(){//remove all dead piece on board
 					floodfill(x, y, piece, BLANK);//floodfill to blank
 				}
 			}
+			else{
+				floodfill(x, y, piece, BLANK);//floodfill to blank
+			}
+			if (simulation[y - 1][x - 1] == 4) simulation[y - 1][x - 1] = BLANK;//replace substitute with blank
 		}
 	}
 }
