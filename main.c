@@ -151,7 +151,10 @@ int main(void){//no arguments to start
 			printf("end of game. Calculsting score...\n");//tell that game ended
 			writelog("end of game. Calculsting score...\n");//write to log
 
+
+			memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
 			territoryscore();//score for territory
+			memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
 			areascore();//score for area
 
 			sprintf(input, "Area score:\n Black: %u   White: %u \n Territory score:\n Black: %u   White: %u\n", black_area_score, white_area_score, black_territory_score, white_territory_score);//make score string
@@ -245,10 +248,12 @@ void init(void){//initialise variables and load other things
 	white_area_score = 0;
 	black_territory_score = 0;
 	white_territory_score = 0;
+	real = 0;//reset real
 	black_captured = 0;//reset captured number
 	white_captured = 0;
 	black_pass = 0;//reset pass
 	white_pass = 0;
+	strength = STRENGTH;//set strength to default value
 	//place / mark star points
 	//4,4 points
 	place(4, 4, STAR);
@@ -329,6 +334,7 @@ void place(unsigned char x, unsigned char y, unsigned char piece){//place a piec
 
 	if (piece == BLACK || piece == WHITE){//if one of them is stones
 		memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
+		real = 1;//real move
 
 		unsigned char opponent;//opponent on array
 		if (piece == BLACK){//if black
@@ -350,6 +356,8 @@ void place(unsigned char x, unsigned char y, unsigned char piece){//place a piec
 		if (y + 1 < BOARD_SIZE && simulation[y][x - 1] == opponent){//down
 			checkliberty(x, y + 1);//check for liberty
 		}
+
+		real = 0;//not real anymore
 		memcpy(board, simulation, BOARD_SIZE*BOARD_SIZE);//copy back
 	}
 }
@@ -360,7 +368,6 @@ void place(unsigned char x, unsigned char y, unsigned char piece){//place a piec
 
 
 void territoryscore(void){//count score for territory / japanese scoring
-	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
 	removedead();//remove all dead pieces
 
 }
@@ -371,7 +378,6 @@ void territoryscore(void){//count score for territory / japanese scoring
 
 
 void areascore(void){//count score for area / chinese scoring
-	memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
 	removedead();//remove all dead pieces
 	int y, x;
 	for (y = 1; y <= BOARD_SIZE; y++){//each row
@@ -637,6 +643,9 @@ int legal(unsigned char x, unsigned char y, unsigned char piece){//check if that
 		return 0;//can't place where there is pieces already 
 	}
 
+	if (x <= 0 || x > BOARD_SIZE || y <= 0 || y > BOARD_SIZE){
+		return 0;//out of bound
+	}
 
 	simulation[y - 1][x - 1] = piece;//place that piece
 
@@ -733,7 +742,14 @@ void floodfill(unsigned char x, unsigned char y, unsigned char target, unsigned 
 		return;//go back
 	}
 	simulation[y - 1][x - 1] = replacement;//replace piece
-
+	if (real == 1){
+		if (target = BLACK){//if filling black
+			black_captured++;//add one to black captured
+		}
+		if (target = WHITE){//if filling white
+			white_captured++;//add one to black captured
+		}
+	}
 	//check for all star points
 	//4,4 points
 	if (x == 4 && y == 4){//if at star point
@@ -895,22 +911,52 @@ void checktouching(unsigned char x, unsigned char y, unsigned char piece){//chec
 
 
 void play(void){//make computer play
+	turn = WHITE;//set turn
 	//random play
 	//make better algorithm
 	srand(time(NULL));//seed rng with time
-	int x = rand() % (BOARD_SIZE);//get random move
-	int y = rand() % (BOARD_SIZE);
-	while (legal(x, y, WHITE) == 0){//while it is not a legal move
-		int x = rand() % (BOARD_SIZE);//get new random move
-		int y = rand() % (BOARD_SIZE);
+	int x, y;//x and y to play
+	int i, j = 0;
+	int best = -1024;//set best to low number
+
+	for (i = strength; i > 0; i--){//for strength times
+		int simx, simy;//simulation x and y
+		j = 0;//reset j
+		do{
+			j++;//add one to j
+			if (j > LIMIT){//if no move was found within limit
+				goto exit;//break out
+			}
+			simx = (rand() % (BOARD_SIZE)) + 1;//get new random move
+			simy = (rand() % (BOARD_SIZE)) + 1;
+		} while (legal(simx, simy, WHITE) == 0);//while it is not a legal move
+		white_area_score = 0;//reset area scores
+		black_area_score = 0;
+		memcpy(simulation, board, BOARD_SIZE*BOARD_SIZE);//copy
+		simulation[simy - 1][simx - 1] = WHITE;//place on simulation
+		areascore();
+		if (white_area_score - black_area_score >= best){
+			best = white_area_score - black_area_score;//new best score
+			x = simx;//replace x and y
+			y = simy;
+		}
 	}
-	place(x, y, WHITE);//place that piece
-	char move[64];//move in string
-	sprintf(move, "White move at %d %d\n", x, y);//make move into string
-	printf("%s", move);//print that move
-	writelog(move);//log that move
+	exit://exit
+	if (best == -1024){//if best wasn't changed
+		pass(WHITE);//better to pass then play
+		printf("white passed\n");//print that white passed this turn
+		putlog("white passed\n");//write that to log file
+	}
+	else{//move white
+		place(x, y, WHITE);//place that piece
+		char move[64];//move in string
+		sprintf(move, "White move at %d %d\n", x, y);//make move into string
+		printf("%s", move);//print that move
+		writelog(move);//log that move
+	}
 	printboard();//print board
 	printf("Black's Turn\n");//display turn
 	writelog("Black's Turn\n");//log turn
 	MOVEBORDS//move bords
+	turn = BLACK;//set back turn
 }
